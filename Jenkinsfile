@@ -17,7 +17,7 @@ pipeline {
 
         stage('Run Application') {
             steps {
-               sh 'nohup npm start > app.log 2>&1 &'
+               sh 'nohup npm start & '
             }
         }
     }
