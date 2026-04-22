@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     stages {
-
         stage('Clone Code') {
             steps {
                 echo 'Cloning repository...'
@@ -17,7 +16,13 @@ pipeline {
 
         stage('Run Application') {
             steps {
-               sh 'nohup npm start & '
+                sh '''
+                    pkill -f "node index.js" || true
+                    export JENKINS_NODE_COOKIE=dontKillMe
+                    nohup npm start > nohup.out 2>&1 &
+                    sleep 5
+                    cat nohup.out
+                '''
             }
         }
     }
