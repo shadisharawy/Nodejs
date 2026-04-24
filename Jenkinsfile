@@ -1,19 +1,14 @@
 pipeline {
-    agent { label 'nodejs' }
+    agent { label 'rhel9-agent-1' }
 
     stages {
-        stage('Checkout') {
+        stage('Verify Agent') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Show Environment') {
-            steps {
-                sh 'hostname'
-                sh 'whoami'
-                sh 'node -v'
-                sh 'npm -v'
+                sh '''
+                    hostname
+                    whoami
+                    pwd
+                '''
             }
         }
 
@@ -23,28 +18,27 @@ pipeline {
             }
         }
 
-        stage('Stop Old App If Running') {
+        stage('Run Application') {
             steps {
                 sh '''
                     pkill -f "node index.js" || true
-                    pkill node || true
+
+                    export PORT=5006
+                    export JENKINS_NODE_COOKIE=dontKillMe
+
+                    nohup npm start > nohup.out 2>&1 &
+
+                    sleep 5
+                    cat nohup.out
                 '''
             }
         }
 
-        stage('Deploy App') {
+        stage('Verify Application') {
             steps {
                 sh '''
-		     export JENKINS_NODE_COOKIE=dontKillMe                    
-	             nohup npm start > app.log 2>&1 &
-                     sleep 5
+                    curl -I http://localhost:5006
                 '''
-            }
-        }
-
-        stage('Verify App') {
-            steps {
-                sh 'curl -I http://localhost:5000 || true'
             }
         }
     }
