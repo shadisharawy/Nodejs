@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent {label 'nodejs'}
 
     stages {
         stage('Clone Code') {
@@ -25,5 +25,10 @@ pipeline {
                 '''
             }
         }
+	stage('Check Agent') {
+	  steps {
+  		 sh 'hostname'
+            } 
+}
     }
 }
