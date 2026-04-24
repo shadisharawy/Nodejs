@@ -1,10 +1,19 @@
 pipeline {
-    agent {label 'nodejs'}
+    agent { label 'nodejs' }
 
     stages {
-        stage('Clone Code') {
+        stage('Checkout') {
             steps {
-                echo 'Cloning repository...'
+                checkout scm
+            }
+        }
+
+        stage('Show Environment') {
+            steps {
+                sh 'hostname'
+                sh 'whoami'
+                sh 'node -v'
+                sh 'npm -v'
             }
         }
 
@@ -14,21 +23,29 @@ pipeline {
             }
         }
 
-        stage('Run Application') {
+        stage('Stop Old App If Running') {
             steps {
                 sh '''
                     pkill -f "node index.js" || true
-                    export JENKINS_NODE_COOKIE=dontKillMe
-                    nohup npm start > nohup.out 2>&1 &
-                    sleep 5
-                    cat nohup.out
+                    pkill node || true
                 '''
             }
         }
-	stage('Check Agent') {
-	  steps {
-  		 sh 'hostname'
-            } 
-}
+
+        stage('Deploy App') {
+            steps {
+                sh '''
+		     export JENKINS_NODE_COOKIE=dontKillMe                    
+	             nohup npm start > app.log 2>&1 &
+                     sleep 5
+                '''
+            }
+        }
+
+        stage('Verify App') {
+            steps {
+                sh 'curl -I http://localhost:5000 || true'
+            }
+        }
     }
 }
