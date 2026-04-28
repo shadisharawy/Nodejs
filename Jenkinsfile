@@ -1,6 +1,8 @@
 pipeline {
     agent { label 'rhel9-agent-1' }
-
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+    }
     stages {
         stage('Checkout') {
             steps {
