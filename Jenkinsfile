@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'nodejs' }
+    agent { label 'rhel9-agent-1' }
 
     stages {
         stage('Checkout') {
